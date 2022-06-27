@@ -3,25 +3,50 @@ package main
 import (
 	"database/sql"
 	"net/http"
+	"github.com/labstack/echo/v4"
 	_ "github.com/mattn/go-sqlite3"
 )
 
 type Product struct {
-	Name        string
-	Description string
+	Name        string `json:"nome"`
+	Description string `json:"description"`
 }
+
+var products []Product
 
 func main() {
-	http.HandleFunc("/", home)
-	http.ListenAndServe(":8080", nil)
-}
-func home(w http.ResponseWriter, r *http.Request) {
-	product := Product{Name: "Julio", Description: "Julio"}
-	persistProduct(product)
-	w.Write([]byte("Go ON.."))
+	generateProducts()
+	e := echo.New()
+ 
+	e.GET("/list", listAll)
+    e.POST("/product", createProduct)
+	e.Logger.Fatal(e.Start(":8080"))
+}  
+
+
+func generateProducts()  {
+	p1 := Product{Name: "Julio", Description: "Julio"}
+	p2 := Product{Name: "Julio2", Description: "Julio2"}
+	products = append(products,p1,p2)
 }
 
-func persistProduct(product Product) {
+
+ 
+func createProduct( c echo.Context) error{
+	product := Product{}
+	c.Bind(&product)
+	err := persistProduct(product)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, nil);
+	}
+	return c.JSON(http.StatusCreated, product);
+}
+func listAll(c echo.Context) error{
+	return c.JSON(200, products)
+}
+
+ 
+func persistProduct(product Product) error {
 	db, err := sql.Open("sqlite3", "production.db")
 
 	if err != nil {
@@ -34,5 +59,11 @@ func persistProduct(product Product) {
 	if err != nil {
 		panic(err)
 	}
-	stmt.Exec(product.Name, product.Description)
+	_, err = stmt.Exec(product.Name, product.Description)
+
+	if err != nil{
+		return err
+	}
+
+	return nil;
 }
