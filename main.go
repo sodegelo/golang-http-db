@@ -1,12 +1,12 @@
 package main
-
+ 
 import ( 
 	"database/sql"
 	"fmt"
-	"time"
-	"net/http"
+	"time" 
 	"math"
 	"math/rand"
+	"net/http" 
 	"github.com/labstack/echo/v4"
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -22,6 +22,7 @@ func main() {
 	execThread();
 	//routes()
 }  
+ 
 func webServerWorker(workerId int, msg chan int )  {
 	for res := range msg {
 		res_2 := math.Sqrt(math.Sqrt(rand.Float64()))
@@ -43,7 +44,6 @@ func execThread()  {
 	}
 	time.Sleep(time.Second * 10)
 }
-
 func routes()  {
 	generateProducts()
 	e := echo.New()
